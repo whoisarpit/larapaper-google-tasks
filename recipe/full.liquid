@@ -1,0 +1,34 @@
+{% assign tasks = data.tasks %}
+{% assign task_list = data.task_list %}
+
+<div class="view view--{{ size }}">
+  <div class="layout layout--col gap--small">
+    <div class="title-bar">
+      <h1>Google Tasks</h1>
+      <span>{{ task_list.title | default: 'Tasks' }}</span>
+    </div>
+
+    {% if tasks and tasks.size > 0 %}
+      <table>
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Due</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks limit: config.task_limit %}
+            <tr>
+              <td>{{ task.title }}</td>
+              <td>{{ task.status }}</td>
+              <td>{{ task.due | default: '—' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No tasks available.</p>
+    {% endif %}
+  </div>
+</div>

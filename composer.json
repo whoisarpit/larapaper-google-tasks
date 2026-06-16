@@ -1,0 +1,16 @@
+{
+  "name": "whoisarpit/larapaper-google-tasks",
+  "type": "project",
+  "description": "Read-only Google Tasks connector and LaraPaper recipe archive",
+  "require": {
+    "php": "^8.4"
+  },
+  "autoload": {
+    "files": [
+      "src/google_tasks.php"
+    ]
+  },
+  "scripts": {
+    "serve": "php -S localhost:8080 -t public"
+  }
+}

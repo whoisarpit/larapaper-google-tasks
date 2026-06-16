@@ -1,0 +1,21 @@
+name: Google Tasks
+strategy: polling
+refresh_interval: 15
+polling_url: '{{feed_url}}'
+polling_verb: get
+custom_fields:
+  - keyname: feed_url
+    field_type: text
+    name: Connector Feed URL
+    default: 'https://your-connector.example/tasks'
+  - keyname: show_completed
+    field_type: select
+    name: Show completed tasks
+    default: 'no'
+    options:
+      - Yes: 'yes'
+      - No: 'no'
+  - keyname: task_limit
+    field_type: number
+    name: Task limit
+    default: 8

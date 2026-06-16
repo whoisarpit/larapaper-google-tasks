@@ -1,0 +1,7 @@
+/.env
+/dist
+/storage/*.json
+/storage/*.lock
+/storage/*.tmp
+/vendor
+.DS_Store
