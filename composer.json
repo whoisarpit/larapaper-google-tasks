@@ -2,6 +2,7 @@
   "name": "whoisarpit/larapaper-google-tasks",
   "type": "project",
   "description": "Read-only Google Tasks connector and LaraPaper recipe archive",
+  "license": "MIT",
   "require": {
     "php": "^8.3"
   },
