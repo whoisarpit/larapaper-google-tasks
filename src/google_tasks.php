@@ -6,6 +6,8 @@ namespace GoogleTasksConnector;
 
 use RuntimeException;
 
+load_environment_file();
+
 function repo_root(): string
 {
     return dirname(__DIR__);
@@ -25,6 +27,45 @@ function env(string $key, ?string $default = null): ?string
     }
 
     return $value;
+}
+
+function load_environment_file(): void
+{
+    $path = repo_root().'/.env';
+    if (! is_file($path)) {
+        return;
+    }
+
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return;
+    }
+
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || str_starts_with($trimmed, '#') || ! str_contains($trimmed, '=')) {
+            continue;
+        }
+
+        [$name, $value] = explode('=', $trimmed, 2);
+        $name = trim($name);
+        $value = trim($value);
+
+        if ($name === '' || getenv($name) !== false) {
+            continue;
+        }
+
+        if (
+            (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+            (str_starts_with($value, "'") && str_ends_with($value, "'"))
+        ) {
+            $value = substr($value, 1, -1);
+        }
+
+        putenv($name.'='.$value);
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
+    }
 }
 
 function require_config(): void
@@ -278,13 +319,22 @@ function fetch_tasklists(): array
 
 function fetch_tasks(?string $tasklistId): array
 {
+    $tasklists = fetch_tasklists();
+
     if ($tasklistId === null || $tasklistId === '') {
-        $lists = fetch_tasklists();
-        $tasklistId = (string) ($lists[0]['id'] ?? '');
+        $tasklistId = (string) ($tasklists[0]['id'] ?? '');
     }
 
     if ($tasklistId === '') {
         throw new RuntimeException('No task list available.');
+    }
+
+    $taskListTitle = null;
+    foreach ($tasklists as $tasklist) {
+        if (($tasklist['id'] ?? null) === $tasklistId) {
+            $taskListTitle = $tasklist['title'] ?? null;
+            break;
+        }
     }
 
     $payload = google_get(rtrim(env('GOOGLE_TASKS_BASE_URL', 'https://tasks.googleapis.com/tasks/v1') ?? 'https://tasks.googleapis.com/tasks/v1', '/').'/lists/'.rawurlencode($tasklistId).'/tasks', [
@@ -315,7 +365,7 @@ function fetch_tasks(?string $tasklistId): array
         'generated_at' => gmdate(DATE_ATOM),
         'task_list' => [
             'id' => $tasklistId,
-            'title' => $payload['title'] ?? $tasklistId,
+            'title' => $taskListTitle ?? ($payload['title'] ?? $tasklistId),
             'updated' => $payload['updated'] ?? null,
         ],
         'tasks' => $tasks,
